@@ -3,18 +3,28 @@ go-backup
 
 
 Input  options are : 
+
                       backup-path, (do we need multiple paths?)
+                      
                       backup-frequency, 
+                      
                       encryption,
+                      
                       compression, 
+                      
                       backup-server-location (ftp, s3, SoftLayer Object Storage),
+                      
                       backup-runtine ??(do we need it)
+                      
                       rollback-count(can we do manage that?)
 
 
 The Main table/data structure/hash map will store these fields both at client side and serve side:
+
                       file full path,
+                      
                       hash,
+                      
                       hash_timestamp,  
 
 
