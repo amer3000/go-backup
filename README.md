@@ -28,7 +28,7 @@ The Main table/data structure/hash map will store these fields both at client si
                       hash_timestamp,  
 
 
-eveytime a new file is updated (if modification_timstamp>=hash_timestamp and hash_new!=has(in the table):-
+Eveytime a new file is updated (if modification_timstamp>=hash_timestamp and hash_new!=has(in the table):-
  1. the file is the file is pushed into server
  2. for the first time the whole table/ds/hash from client will be replicated (bkp_data0)
  3. for the >first times every iteration of change .. the row corresponding updated  entries will be moved to backup_I where I is the iteration count. 
