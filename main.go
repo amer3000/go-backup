@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+	"flag"
 )
 
 //https://github.com/mrjbq7/re-factor/blob/master/dupe/dupe.go
@@ -14,7 +15,25 @@ import (
 var rootDir string = "."
 
 func main() {
-	fmt.Println("Hello World!!!!!")
+
+        //take CLI input
+	dirPtr := flag.String("path","."," string")
+	svrPtr := flag.String("server","www.softlayer.com"," string")
+	frqPtr := flag.Int("bkp-interval", 60, "backup interval in hours")
+	comprsPtr := flag.Bool("compression", false, "a bool")
+	encrptPtr := flag.Bool("encryption", false, "a bool")
+	flag.Parse()
+	dir_path := *dirPtr
+	server := *svrPtr
+	frequency := *frqPtr
+	compress := *comprsPtr
+	encrypt := *encrptPtr
+	//I am not including bakcup run time since 
+	//having both frequency and backup run time 
+	///does not make sense
+
+
+	fmt.Println("Hello user your inputs are  ",dir_path,server, frequency,compress,encrypt)
 	t0 := time.Now()
 	filepath.Walk(rootDir, VisitFile)
 	t1 := time.Now()
