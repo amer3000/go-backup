@@ -2,23 +2,30 @@ package main
 
 import (
 	"crypto/md5"
+	"encoding/hex"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
-	"flag"
 )
 
-//https://github.com/mrjbq7/re-factor/blob/master/dupe/dupe.go
+var rootDir string = "./testData"
 
-var rootDir string = "."
+type FileHash struct {
+	fullpath       string
+	hash           string
+	lastModifyTime time.Time
+}
+
+var fileHashes []FileHash
 
 func main() {
 
-        //take CLI input
-	dirPtr := flag.String("path","."," string")
-	svrPtr := flag.String("server","www.softlayer.com"," string")
+	//take CLI input
+	dirPtr := flag.String("path", ".", " string")
+	svrPtr := flag.String("server", "www.softlayer.com", " string")
 	frqPtr := flag.Int("bkp-interval", 60, "backup interval in hours")
 	comprsPtr := flag.Bool("compression", false, "a bool")
 	encrptPtr := flag.Bool("encryption", false, "a bool")
@@ -28,15 +35,26 @@ func main() {
 	frequency := *frqPtr
 	compress := *comprsPtr
 	encrypt := *encrptPtr
-	//I am not including bakcup run time since 
-	//having both frequency and backup run time 
+	//I am not including bakcup run time since
+	//having both frequency and backup run time
 	///does not make sense
 
-
-	fmt.Println("Hello user your inputs are  ",dir_path,server, frequency,compress,encrypt)
+	fmt.Println("Hello user your inputs are  ", dir_path, server, frequency, compress, encrypt)
 	t0 := time.Now()
+
+	FO, err := os.Create("backup.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer FO.Close()
+
 	filepath.Walk(rootDir, VisitFile)
+
+	for _, fh := range fileHashes {
+		FO.WriteString(fh.fullpath + ", " + fh.hash + ", " + fh.lastModifyTime.String() + "\n")
+	}
 	t1 := time.Now()
+
 	fmt.Printf("The call took %v to run.\n", t1.Sub(t0))
 }
 
@@ -53,9 +71,11 @@ func VisitFile(fullpath string, f os.FileInfo, err error) error {
 	if err != nil {
 		return err
 	}
+
 	if !f.IsDir() {
+		fullpath, _ = filepath.Abs(fullpath)
 		hash := MD5OfFile(fullpath)
-		fmt.Printf("%s    %x\n", fullpath, hash)
+		fileHashes = append(fileHashes, FileHash{fullpath, hex.EncodeToString(hash), f.ModTime()})
 	}
 	return nil
 }
