@@ -3,7 +3,7 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"flag"
+	// "flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -12,6 +12,7 @@ import (
 )
 
 var rootDir string = "./testData"
+var backupDir string = "/cygdrive/z/testBackup"
 
 type FileHash struct {
 	fullpath       string
@@ -24,7 +25,7 @@ var fileHashes []FileHash
 func main() {
 
 	//take CLI input
-	dirPtr := flag.String("path", ".", " string")
+/*	dirPtr := flag.String("path", ".", " string")
 	svrPtr := flag.String("server", "www.softlayer.com", " string")
 	frqPtr := flag.Int("bkp-interval", 60, "backup interval in hours")
 	comprsPtr := flag.Bool("compression", false, "a bool")
@@ -35,25 +36,27 @@ func main() {
 	frequency := *frqPtr
 	compress := *comprsPtr
 	encrypt := *encrptPtr
-	//I am not including bakcup run time since
+*/	//I am not including bakcup run time since
 	//having both frequency and backup run time
 	///does not make sense
 
-	fmt.Println("Hello user your inputs are  ", dir_path, server, frequency, compress, encrypt)
-	t0 := time.Now()
+//	fmt.Println("Hello user your inputs are  ", dir_path, server, frequency, compress, encrypt)
 
-	FO, err := os.Create("backup.txt")
+	t0 := time.Now()
+	fmt.Printf("\nIt begins at %v", t0)
+	
+	/*FO, err := os.Create("backup.txt")
 	if err != nil {
 		panic(err)
 	}
 	defer FO.Close()
-
+*/
 	filepath.Walk(rootDir, VisitFile)
 
-	for _, fh := range fileHashes {
+/*	for _, fh := range fileHashes {
 		FO.WriteString(fh.fullpath + ", " + fh.hash + ", " + fh.lastModifyTime.String() + "\n")
 	}
-	t1 := time.Now()
+*/	t1 := time.Now()
 
 	fmt.Printf("The call took %v to run.\n", t1.Sub(t0))
 }
@@ -78,4 +81,8 @@ func VisitFile(fullpath string, f os.FileInfo, err error) error {
 		fileHashes = append(fileHashes, FileHash{fullpath, hex.EncodeToString(hash), f.ModTime()})
 	}
 	return nil
+}
+
+func FileCopy(filename string) {
+	
 }
