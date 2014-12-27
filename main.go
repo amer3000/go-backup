@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	// "flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -12,7 +13,7 @@ import (
 )
 
 var rootDir string = "./testData"
-var backupDir string = "/cygdrive/z/testBackup"
+var backupDir string = "Z:/testBackup/"
 
 type FileHash struct {
 	fullpath       string
@@ -25,38 +26,38 @@ var fileHashes []FileHash
 func main() {
 
 	//take CLI input
-/*	dirPtr := flag.String("path", ".", " string")
-	svrPtr := flag.String("server", "www.softlayer.com", " string")
-	frqPtr := flag.Int("bkp-interval", 60, "backup interval in hours")
-	comprsPtr := flag.Bool("compression", false, "a bool")
-	encrptPtr := flag.Bool("encryption", false, "a bool")
-	flag.Parse()
-	dir_path := *dirPtr
-	server := *svrPtr
-	frequency := *frqPtr
-	compress := *comprsPtr
-	encrypt := *encrptPtr
-*/	//I am not including bakcup run time since
+	/*	dirPtr := flag.String("path", ".", " string")
+		svrPtr := flag.String("server", "www.softlayer.com", " string")
+		frqPtr := flag.Int("bkp-interval", 60, "backup interval in hours")
+		comprsPtr := flag.Bool("compression", false, "a bool")
+		encrptPtr := flag.Bool("encryption", false, "a bool")
+		flag.Parse()
+		dir_path := *dirPtr
+		server := *svrPtr
+		frequency := *frqPtr
+		compress := *comprsPtr
+		encrypt := *encrptPtr
+	*/ //I am not including bakcup run time since
 	//having both frequency and backup run time
 	///does not make sense
 
-//	fmt.Println("Hello user your inputs are  ", dir_path, server, frequency, compress, encrypt)
+	//	fmt.Println("Hello user your inputs are  ", dir_path, server, frequency, compress, encrypt)
 
 	t0 := time.Now()
 	fmt.Printf("\nIt begins at %v", t0)
-	
+
 	/*FO, err := os.Create("backup.txt")
 	if err != nil {
 		panic(err)
 	}
 	defer FO.Close()
-*/
+	*/
 	filepath.Walk(rootDir, VisitFile)
 
-/*	for _, fh := range fileHashes {
-		FO.WriteString(fh.fullpath + ", " + fh.hash + ", " + fh.lastModifyTime.String() + "\n")
-	}
-*/	t1 := time.Now()
+	/*	for _, fh := range fileHashes {
+			FO.WriteString(fh.fullpath + ", " + fh.hash + ", " + fh.lastModifyTime.String() + "\n")
+		}
+	*/t1 := time.Now()
 
 	fmt.Printf("The call took %v to run.\n", t1.Sub(t0))
 }
@@ -77,12 +78,38 @@ func VisitFile(fullpath string, f os.FileInfo, err error) error {
 
 	if !f.IsDir() {
 		fullpath, _ = filepath.Abs(fullpath)
+		fmt.Println("Copying... " + fullpath)
+		FileCopy(fullpath)
 		hash := MD5OfFile(fullpath)
 		fileHashes = append(fileHashes, FileHash{fullpath, hex.EncodeToString(hash), f.ModTime()})
 	}
 	return nil
 }
 
-func FileCopy(filename string) {
-	
+// http://stackoverflow.com/a/21061062
+func FileCopy(src string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	defer in.Close()
+
+	_, filename := filepath.Split(src)
+
+	dst := backupDir + filename
+
+	out, err := os.Create(dst)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	defer out.Close()
+	_, err = io.Copy(out, in)
+	cerr := out.Close()
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	return cerr
 }
