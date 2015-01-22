@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	// "flag"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -14,11 +15,17 @@ import (
 
 var rootDir string = "./testData"
 var backupDir string = "Z:/testBackup/"
+var configsFile string = "./configs.json"
 
 type FileHash struct {
 	fullpath       string
 	hash           string
 	lastModifyTime time.Time
+}
+
+type configs struct {
+	Src []string
+	Dst string
 }
 
 var fileHashes []FileHash
@@ -45,6 +52,8 @@ func main() {
 
 	t0 := time.Now()
 	fmt.Printf("\nIt begins at %v", t0)
+
+	parseConfigs()
 
 	/*FO, err := os.Create("backup.txt")
 	if err != nil {
@@ -112,4 +121,21 @@ func FileCopy(src string) error {
 		return err
 	}
 	return cerr
+}
+
+func parseConfigs() {
+	file, err := ioutil.ReadFile(configsFile)
+	if err != nil {
+		fmt.Printf("File error: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("%s\n", string(file))
+
+	var myConfigs configs
+	err = json.Unmarshal(file, &myConfigs)
+	if err != nil {
+		fmt.Printf("JSON error: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("Results: %v\n", myConfigs)
 }
